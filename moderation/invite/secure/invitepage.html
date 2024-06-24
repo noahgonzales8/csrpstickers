@@ -217,7 +217,7 @@
                 return;
             }
 
-            const webhookUrl = 'YOUR_DISCORD_WEBHOOK_URL'; // Replace with your Discord webhook URL
+            const webhookUrl = 'https://discord.com/api/webhooks/1254926558640996464/1otgYUDnNrKGy6i-UF11JMhlnCiOtCA9YWhictqmaAGViVleYOmIzlQ0WwEg_f4IYxCO'; // Replace with your Discord webhook URL
 
             const payload = {
                 content: `${username} has ${action} the invite.`
@@ -234,12 +234,12 @@
                 if (response.ok) {
                     openModal(action === 'accepted' ? 'acceptModal' : 'declineModal');
                 } else {
-                    alert('Failed to send webhook.');
+                    alert('Error: WEBH_FAILURE_SEND');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Failed to send webhook.');
+                alert('Error: WEBH_FAILURE_SEND.');
             });
         }
     </script>
