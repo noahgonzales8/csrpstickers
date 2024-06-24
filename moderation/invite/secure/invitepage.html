@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSRP Stickers | Moderation Invite</title>
+    <title>CSRP Stickers | Moderation Team Invite</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Material+Icons');
 
@@ -114,23 +114,51 @@
             text-decoration: none;
             cursor: pointer;
         }
+        .username-input {
+            margin: 20px 0;
+            padding: 10px;
+            width: 80%;
+            max-width: 300px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .submit-btn {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            border: none;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
     </style>
 </head>
-<body>
+<body onload="openModal('usernameModal')">
     <div class="container">
         <img src="https://images-ext-1.discordapp.net/external/pkox4TEK0LAyMgsT8cSKl639F5XrKlkNSN2k6rTUI_k/%3Fsize%3D512/https/cdn.discordapp.com/icons/1222044156554117160/21285793ba32100276a6230545adf324.png?format=webp&quality=lossless" alt="Logo" class="logo">
         <h1>CSRP Stickers Moderation Team</h1>
         <p>Please accept or decline the invitation to the moderation team below:</p>
         <div class="buttons">
-            <button class="button accept" onclick="openModal('acceptModal')">
+            <button class="button accept" onclick="sendWebhook('accepted')">
                 <span class="material-icons">check_circle</span>
             </button>
-            <button class="button decline" onclick="openModal('declineModal')">
+            <button class="button decline" onclick="sendWebhook('declined')">
                 <span class="material-icons">cancel</span>
             </button>
         </div>
         <div class="footer">
             &copy; 2024 CSRP Stickers
+        </div>
+    </div>
+
+    <!-- Username Modal -->
+    <div id="usernameModal" class="modal">
+        <div class="modal-content">
+            <h2>Welcome!</h2>
+            <p>Please type your username that you used to submit the application:</p>
+            <input type="text" id="username" class="username-input" placeholder="Enter your username">
+            <button class="submit-btn" onclick="submitUsername()">Submit</button>
         </div>
     </div>
 
@@ -140,7 +168,8 @@
             <span class="close" onclick="closeModal('acceptModal')">&times;</span>
             <span class="material-icons">check_circle</span>
             <h2>Invite Accepted</h2>
-            <p>You have successfully accepted the invite to the CSRP Stickers Moderation Team. You will receive a DM from Noah with more info. Welcome to the team!</p>
+            <p>You have successfully accepted the invite. You will receive a DM from our team with more info. Welcome to the staff team!</p>
+           
         </div>
     </div>
 
@@ -150,11 +179,14 @@
             <span class="close" onclick="closeModal('declineModal')">&times;</span>
             <span class="material-icons">cancel</span>
             <h2>Invite Declined</h2>
-            <p>You have declined the invite to the moderation team. Thanks for your interest.</p>
+            <p>You have declined the invite.Thanks for your interest in the Moderation Team.</p>
+            
         </div>
     </div>
 
     <script>
+        let username = '';
+
         function openModal(modalId) {
             document.getElementById(modalId).style.display = "flex";
         }
@@ -167,6 +199,48 @@
             if (event.target.classList.contains('modal')) {
                 closeModal(event.target.id);
             }
+        }
+
+        function submitUsername() {
+            username = document.getElementById('username').value;
+            if (username) {
+                closeModal('usernameModal');
+            } else {
+                alert('Please enter your username.');
+            }
+        }
+
+        function sendWebhook(action) {
+            if (!username) {
+                alert('Please enter your username.');
+                openModal('usernameModal');
+                return;
+            }
+
+            const webhookUrl = 'YOUR_DISCORD_WEBHOOK_URL'; // Replace with your Discord webhook URL
+
+            const payload = {
+                content: `${username} has ${action} the invite.`
+            };
+
+            fetch(webhookUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(response => {
+                if (response.ok) {
+                    openModal(action === 'accepted' ? 'acceptModal' : 'declineModal');
+                } else {
+                    alert('Failed to send webhook.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to send webhook.');
+            });
         }
     </script>
 </body>
