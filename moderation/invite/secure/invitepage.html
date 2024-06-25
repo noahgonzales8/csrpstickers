@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSRP Stickers | Moderation </title>
+    <title>CSRP Stickers | Moderation Team Invite</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Material+Icons');
 
@@ -140,9 +140,9 @@
 </head>
 <body onload="openModal('usernameModal')">
     <div class="container">
-        <img src="logo.png" alt="Logo" class="logo">
+        <img src="https://images-ext-1.discordapp.net/external/pkox4TEK0LAyMgsT8cSKl639F5XrKlkNSN2k6rTUI_k/%3Fsize%3D512/https/cdn.discordapp.com/icons/1222044156554117160/21285793ba32100276a6230545adf324.png?format=webp&quality=lossless" alt="Logo" class="logo">
         <h1>CSRP Stickers Moderation Team</h1>
-        <p>Please accept or decline the invitation to the Moderation Teambelow:</p>
+        <p>Please accept or decline the invitation to the Moderation Team below:</p>
         <div class="buttons">
             <button class="button accept" onclick="sendWebhook('accepted')">
                 <span class="material-icons">check_circle</span>
@@ -173,8 +173,7 @@
             <span class="close" onclick="closeModal('acceptModal')">&times;</span>
             <span class="material-icons">check_circle</span>
             <h2>Invite Accepted</h2>
-            <p>You have successfully accepted the invite. A staff member will DM you with more info. Welcome to the team!</p>
-            
+            <p>You have successfully accepted the invite. You will receive a DM from a staff member with more info. Welcome to the team!</p>
         </div>
     </div>
 
@@ -185,12 +184,13 @@
             <span class="material-icons">cancel</span>
             <h2>Invite Declined</h2>
             <p>You have declined the invite. Thanks for your interest in CSRP Stickers Moderation.</p>
-            <img src="declined_image.png" alt="Declined Image">
         </div>
     </div>
 
     <script>
         let username = '';
+        const urlParams = new URLSearchParams(window.location.search);
+        const bypassAlreadyResponded = urlParams.get('bypassAlreadyResponded') === 'true';
 
         function openModal(modalId) {
             document.getElementById(modalId).style.display = "flex";
@@ -210,8 +210,8 @@
             username = document.getElementById('username').value;
             if (username) {
                 const respondedUsers = JSON.parse(localStorage.getItem('respondedUsers') || '[]');
-                if (respondedUsers.includes(username)) {
-                    document.getElementById('responseMsg').innerText = 'Already Responded to Moderation Team Invite.';
+                if (!bypassAlreadyResponded && respondedUsers.includes(username)) {
+                    document.getElementById('responseMsg').innerText = 'Already Responded to Invite.';
                 } else {
                     closeModal('usernameModal');
                 }
@@ -228,16 +228,16 @@
             }
 
             const respondedUsers = JSON.parse(localStorage.getItem('respondedUsers') || '[]');
-            if (respondedUsers.includes(username)) {
-                document.getElementById('responseMsg').innerText = 'Already Responded to Moderation Team Invite.';
+            if (!bypassAlreadyResponded && respondedUsers.includes(username)) {
+                document.getElementById('responseMsg').innerText = 'Already Responded to Invite.';
                 openModal('usernameModal');
                 return;
             }
 
-            const webhookUrl = 'https://discord.com/api/webhooks/1254991880052015124/o1plkRQ9nTT1fyThPuxJzYiCuGYr-yWMXJHIgGxv5EL0C8HX6hhe1h_G4yPZzQHXdywu'; // Replace with your Discord webhook URL
+            const webhookUrl = 'YOUR_DISCORD_WEBHOOK_URL'; // Replace with your Discord webhook URL
 
             const payload = {
-                content: `${username} has ${action} the invite. If they accepted, remove their invite and DM them.`
+                content: `${username} has ${action} the invite. If they accepted, remove their Invite Pending role and add TM role. Then DM them. If denied, remove the invite pending role. `
             };
 
             fetch(webhookUrl, {
@@ -253,12 +253,12 @@
                     localStorage.setItem('respondedUsers', JSON.stringify(respondedUsers));
                     openModal(action === 'accepted' ? 'acceptModal' : 'declineModal');
                 } else {
-                    alert('Whoops! There was an error. Please send this to Noah: ERR_WEBHOOK_SEND');
+                    alert('Whoops! Please send this error ID to Noah: ERR_WEBHOOK_FAILURE_SEND');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Whoops! There was an error. Please send this to Noah: ERR_WEBHOOK_SEND');
+                alert('Whoops! Please send this error ID to Noah: ERR_WEBHOOK_FAILURE_SEND');
             });
         }
     </script>
