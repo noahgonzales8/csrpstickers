@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSRP Stickers | Moderation Team Invite</title>
+    <title>CSRP Stickers | Moderation </title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Material+Icons');
 
@@ -132,13 +132,17 @@
             cursor: pointer;
             border-radius: 5px;
         }
+        .response-msg {
+            color: red;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body onload="openModal('usernameModal')">
     <div class="container">
-        <img src="https://images-ext-1.discordapp.net/external/pkox4TEK0LAyMgsT8cSKl639F5XrKlkNSN2k6rTUI_k/%3Fsize%3D512/https/cdn.discordapp.com/icons/1222044156554117160/21285793ba32100276a6230545adf324.png?format=webp&quality=lossless" alt="Logo" class="logo">
+        <img src="logo.png" alt="Logo" class="logo">
         <h1>CSRP Stickers Moderation Team</h1>
-        <p>Please accept or decline the invitation to the moderation team below:</p>
+        <p>Please accept or decline the invitation to the Moderation Teambelow:</p>
         <div class="buttons">
             <button class="button accept" onclick="sendWebhook('accepted')">
                 <span class="material-icons">check_circle</span>
@@ -159,6 +163,7 @@
             <p>Please type your username that you used to submit the application:</p>
             <input type="text" id="username" class="username-input" placeholder="Enter your username">
             <button class="submit-btn" onclick="submitUsername()">Submit</button>
+            <p id="responseMsg" class="response-msg"></p>
         </div>
     </div>
 
@@ -168,8 +173,8 @@
             <span class="close" onclick="closeModal('acceptModal')">&times;</span>
             <span class="material-icons">check_circle</span>
             <h2>Invite Accepted</h2>
-            <p>You have successfully accepted the invite. You will receive a DM from our team with more info. Welcome to the staff team!</p>
-           
+            <p>You have successfully accepted the invite. A staff member will DM you with more info. Welcome to the team!</p>
+            
         </div>
     </div>
 
@@ -179,8 +184,8 @@
             <span class="close" onclick="closeModal('declineModal')">&times;</span>
             <span class="material-icons">cancel</span>
             <h2>Invite Declined</h2>
-            <p>You have declined the invite.Thanks for your interest in the Moderation Team.</p>
-            
+            <p>You have declined the invite. Thanks for your interest in CSRP Stickers Moderation.</p>
+            <img src="declined_image.png" alt="Declined Image">
         </div>
     </div>
 
@@ -204,7 +209,12 @@
         function submitUsername() {
             username = document.getElementById('username').value;
             if (username) {
-                closeModal('usernameModal');
+                const respondedUsers = JSON.parse(localStorage.getItem('respondedUsers') || '[]');
+                if (respondedUsers.includes(username)) {
+                    document.getElementById('responseMsg').innerText = 'Already Responded to Moderation Team Invite.';
+                } else {
+                    closeModal('usernameModal');
+                }
             } else {
                 alert('Please enter your username.');
             }
@@ -217,10 +227,17 @@
                 return;
             }
 
-            const webhookUrl = 'https://discord.com/api/webhooks/1254926558640996464/1otgYUDnNrKGy6i-UF11JMhlnCiOtCA9YWhictqmaAGViVleYOmIzlQ0WwEg_f4IYxCO'; // Replace with your Discord webhook URL
+            const respondedUsers = JSON.parse(localStorage.getItem('respondedUsers') || '[]');
+            if (respondedUsers.includes(username)) {
+                document.getElementById('responseMsg').innerText = 'Already Responded to Moderation Team Invite.';
+                openModal('usernameModal');
+                return;
+            }
+
+            const webhookUrl = 'https://discord.com/api/webhooks/1254991880052015124/o1plkRQ9nTT1fyThPuxJzYiCuGYr-yWMXJHIgGxv5EL0C8HX6hhe1h_G4yPZzQHXdywu'; // Replace with your Discord webhook URL
 
             const payload = {
-                content: `${username} has ${action} the Moderation Team invite. **Remove their Invite Pending role, if approved DM them and add the TM role, then DM them. If denied remove the Invite pending**`
+                content: `${username} has ${action} the invite. If they accepted, remove their invite and DM them.`
             };
 
             fetch(webhookUrl, {
@@ -232,14 +249,16 @@
             })
             .then(response => {
                 if (response.ok) {
+                    respondedUsers.push(username);
+                    localStorage.setItem('respondedUsers', JSON.stringify(respondedUsers));
                     openModal(action === 'accepted' ? 'acceptModal' : 'declineModal');
                 } else {
-                    alert('Error: WEBH_FAILURE_SEND');
+                    alert('Whoops! There was an error. Please send this to Noah: ERR_WEBHOOK_SEND');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Error: WEBH_FAILURE_SEND.');
+                alert('Whoops! There was an error. Please send this to Noah: ERR_WEBHOOK_SEND');
             });
         }
     </script>
