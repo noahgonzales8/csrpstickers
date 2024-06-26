@@ -24,6 +24,9 @@
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
+        .login-container, .dashboard-container {
+            display: none;
+        }
         .logo {
             width: 100px;
             height: 100px;
@@ -164,13 +167,34 @@
         }
     </style>
 </head>
-<body>
+<body onload="openModal('usernameModal')">
+    <!-- Invite Acceptance Page -->
+    <div class="container" id="inviteContainer">
+        <img src="https://cdn.discordapp.com/icons/1222044156554117160/21285793ba32100276a6230545adf324.png?size=512" alt="Logo" class="logo">
+        <h1>CSRP Stickers Moderation Team</h1>
+        <p>Please accept or decline the invitation to the moderation team below:</p>
+        <div class="buttons">
+            <button class="button accept" onclick="sendWebhook('accepted')">
+                <span class="material-icons">check_circle</span>
+            </button>
+            <button class="button decline" onclick="sendWebhook('declined')">
+                <span class="material-icons">cancel</span>
+            </button>
+        </div>
+        <div class="footer">
+            &copy; 2024 CSRP Stickers
+        </div>
+        <button class="btn" onclick="showLogin()">Staff Dashboard</button>
+    </div>
+
     <!-- Login Screen -->
-    <div class="login-container" id="loginContainer">
-        <h2>Staff Dashboard Login</h2>
-        <input type="password" id="password" class="input-field" placeholder="Enter password">
-        <button class="btn" onclick="login()">Login</button>
-        <p id="loginError" style="color: red; display: none;">Incorrect password. Please try again.</p>
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <h2>Staff Dashboard Login</h2>
+            <input type="password" id="password" class="input-field" placeholder="Enter password">
+            <button class="btn" onclick="login()">Login</button>
+            <p id="loginError" style="color: red; display: none;">Incorrect password. Please try again.</p>
+        </div>
     </div>
 
     <!-- Dashboard -->
@@ -197,24 +221,6 @@
         </div>
     </div>
 
-    <!-- Invite Acceptance Page -->
-    <div class="container" id="inviteContainer">
-        <img src="https://images-ext-1.discordapp.net/external/pkox4TEK0LAyMgsT8cSKl639F5XrKlkNSN2k6rTUI_k/%3Fsize%3D512/https/cdn.discordapp.com/icons/1222044156554117160/21285793ba32100276a6230545adf324.png?format=webp&quality=lossless" alt="Logo" class="logo">
-        <h1>CSRP Stickers Moderation Team</h1>
-        <p>Please accept or decline the invitation to the moderation team below:</p>
-        <div class="buttons">
-            <button class="button accept" onclick="sendWebhook('accepted')">
-                <span class="material-icons">check_circle</span>
-            </button>
-            <button class="button decline" onclick="sendWebhook('declined')">
-                <span class="material-icons">cancel</span>
-            </button>
-        </div>
-        <div class="footer">
-            &copy; 2024 CSRP Stickers
-        </div>
-    </div>
-
     <!-- Username Modal -->
     <div id="usernameModal" class="modal">
         <div class="modal-content">
@@ -232,7 +238,7 @@
             <span class="close" onclick="closeModal('acceptModal')">&times;</span>
             <span class="material-icons">check_circle</span>
             <h2>Invite Accepted</h2>
-            <p>You have successfully accepted the invite. A staff member will DM you with more info. Welcome to the staff team!</p>
+            <p>You have successfully accepted the invite. A staff member will DM you with more info. Welcome to the Staff Team!</p>
         </div>
     </div>
 
@@ -242,17 +248,22 @@
             <span class="close" onclick="closeModal('declineModal')">&times;</span>
             <span class="material-icons">cancel</span>
             <h2>Invite Declined</h2>
-            <p>You have declined the invite to the moderation team. Thank you for your interest in CSRP Stickers Moderation.</p>
+            <p>You have declined the invite. Thank you for your interest in CSRP Stickers Moderation.</p>
         </div>
     </div>
 
     <script>
-        const PASSWORD = 'staff123'; // Set the password for the dashboard
+        const PASSWORD = 'csrpstickersStaff123'; // Set the password for the dashboard
+        let bypassAlreadyResponded = false;
+
+        function showLogin() {
+            document.getElementById('loginModal').style.display = 'flex';
+        }
 
         function login() {
             const password = document.getElementById('password').value;
-            if (password === CSRPSTICKERS1234) {
-                document.getElementById('loginContainer').style.display = 'none';
+            if (password === PASSWORD) {
+                document.getElementById('loginModal').style.display = 'none';
                 document.getElementById('dashboardContainer').style.display = 'flex';
                 loadRecentResponses();
             } else {
@@ -312,16 +323,17 @@
         }
 
         function submitUsername() {
-            username = document.getElementById('username').value;
+            const username = document.getElementById('username').value;
             if (username) {
-                const respondedUsers = JSON.parse(localStorage.getItem('respondedUsers') || '[]');
                 const blacklistedUsers = JSON.parse(localStorage.getItem('blacklistedUsers') || '[]');
+                const respondedUsers = JSON.parse(localStorage.getItem('respondedUsers') || '[]');
                 if (blacklistedUsers.includes(username)) {
                     document.getElementById('responseMsg').innerText = 'You are blacklisted and cannot respond to the invite.';
                 } else if (!bypassAlreadyResponded && respondedUsers.some(user => user.username === username)) {
                     document.getElementById('responseMsg').innerText = 'Already Responded to Invite.';
                 } else {
                     closeModal('usernameModal');
+                    document.getElementById('inviteContainer').style.display = 'block';
                 }
             } else {
                 alert('Please enter your username.');
@@ -352,10 +364,10 @@
             respondedUsers.push(response);
             localStorage.setItem('respondedUsers', JSON.stringify(respondedUsers));
 
-            const webhookUrl = 'https://discord.com/api/webhooks/1254991880052015124/o1plkRQ9nTT1fyThPuxJzYiCuGYr-yWMXJHIgGxv5EL0C8HX6hhe1h_G4yPZzQHXdywu'; // Discord Webhook URL
+            const webhookUrl = 'https://discord.com/api/webhooks/1254991880052015124/o1plkRQ9nTT1fyThPuxJzYiCuGYr-yWMXJHIgGxv5EL0C8HX6hhe1h_G4yPZzQHXdywu'; // Webhook URL
 
             const payload = {
-                content: `${username} has ${action} the invite.`
+                content: `${username} has ${action} the invite. If accepted, add the TM role, and remove invite pending, then DM them. If denied, remove invite pending.`
             };
 
             fetch(webhookUrl, {
@@ -369,14 +381,18 @@
                 if (response.ok) {
                     openModal(action === 'accepted' ? 'acceptModal' : 'declineModal');
                 } else {
-                    alert('Oops! An error occurred. Please send this to Noah: ERR_WEBH_SEND');
+                    alert('Oops! An error occurred. Please send this to Noah: ERR_WEBH_SEND_FAILURE');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Oops! An error occurred. Please send this to Noah: ERR_WEBH_SEND');
+                alert('Oops! An error occurred. Please send this to Noah: ERR_WEBH_SEND_FAILURE');
             });
         }
+
+        // Check for URL parameter to bypass the "Already Responded" check
+        const urlParams = new URLSearchParams(window.location.search);
+        bypassAlreadyResponded = urlParams.get('bypassAlreadyResponded') === 'true';
     </script>
 </body>
 </html>
